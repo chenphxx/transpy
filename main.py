@@ -26,8 +26,14 @@ def on_press(key):
                 # 翻译并显示结果
                 result = translator.nlp_demo(token).json()  # 翻译API
                 print(result)
-                windows = window.ResultWindow(result["translated_text"])
-                windows.mainloop()
+                try:
+                    windows = window.ResultWindow(result["translated_text"])
+                    windows.mainloop()
+                except:
+                    print("出错了, 请重试")
+                    message = "error_code: " + result["error_code"] + "\n" + result["error_msg"]
+                    windows = window.ResultWindow(message)
+                    windows.mainloop()
 
             first_press = None  # 重置时间
 
