@@ -35,9 +35,9 @@ def on_press(key):
                     windows = window.ResultWindow(message)
                     windows.mainloop()
 
-            first_press = None   # 重置时间
+            first_press = None  # 重置时间
 
 # 开始监听按键事件
-with pynput.keyboard.Listener(on_press=on_press) as listener:
+with pynput.keyboard.Listener(on_press = on_press) as listener:
     print("按下两次Ctrl来触发翻译")
     listener.join()
