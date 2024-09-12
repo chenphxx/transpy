@@ -5,10 +5,11 @@ import re
 
 
 # 账号信息
-endpoint = "cn-north-4"
-huawei_account = "***REMOVED***"
-IAM_user = "***REMOVED***"
-password = "***REMOVED***"
+endpoint = your_endpoint
+huawei_account = your_account
+IAM_user = your_user
+password = your_password
+project = your_project
 
 # 获取IAM Token
 def get_iam_token():
@@ -81,7 +82,7 @@ def nlp_demo(token):
     else:
         aim_language = "zh"
 
-    url = f"https://nlp-ext.{endpoint}.myhuaweicloud.com/v1/***REMOVED***/machine-translation/text-translation"
+    url = f"https://nlp-ext.{endpoint}.myhuaweicloud.com/v1/{project}/machine-translation/text-translation"
     header = \
     {
         'Content-Type': 'application/json',
