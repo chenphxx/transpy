@@ -1,5 +1,5 @@
-('C:\\Users\\chenphxx\\Documents\\VS '
- 'Code\\Python\\Project\\translator\\build\\划词翻译\\PYZ-00.pyz',
+('C:\\Users\\chenphxx\\Documents\\GitHub '
+ 'Project\\slash-translator\\build\\划词翻译\\PYZ-00.pyz',
  [('__future__',
    'C:\\Users\\chenphxx\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\__future__.py',
    'PYMODULE'),
@@ -577,8 +577,8 @@
    'C:\\Users\\chenphxx\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\tracemalloc.py',
    'PYMODULE'),
   ('translator',
-   'C:\\Users\\chenphxx\\Documents\\VS '
-   'Code\\Python\\Project\\translator\\translator.py',
+   'C:\\Users\\chenphxx\\Documents\\GitHub '
+   'Project\\slash-translator\\translator.py',
    'PYMODULE'),
   ('typing',
    'C:\\Users\\chenphxx\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\typing.py',
@@ -701,8 +701,8 @@
    'C:\\Users\\chenphxx\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\urllib3\\util\\wait.py',
    'PYMODULE'),
   ('window',
-   'C:\\Users\\chenphxx\\Documents\\VS '
-   'Code\\Python\\Project\\translator\\window.py',
+   'C:\\Users\\chenphxx\\Documents\\GitHub '
+   'Project\\slash-translator\\window.py',
    'PYMODULE'),
   ('zipfile',
    'C:\\Users\\chenphxx\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\zipfile\\__init__.py',
