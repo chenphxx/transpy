@@ -25,6 +25,14 @@ class ResultWindow(tkinter.Tk):
         self.title("翻译结果")  # 窗口标题
         
         self.iconbitmap(icon_path)
+        
+        # 获取鼠标的当前坐标
+        x = self.winfo_pointerx()
+        y = self.winfo_pointery()
+        
+        # 设置窗口位置到鼠标位置
+        self.geometry(f'+{x}+{y}')
+        
         # 340像素时换行 字体Cascadia Code 大小12
         self.label = tkinter.Label(self, text=result, wraplength=340, font=("Cascadia Code", 12))
         self.label.pack(pady=7)
@@ -37,7 +45,3 @@ class ResultWindow(tkinter.Tk):
     def copy_to_clipboard(self):
         pyperclip.copy(self.label.cget("text"))
         self.destroy()
-
-
-if __name__ == "__main__":
-    root.mainloop()
