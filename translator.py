@@ -5,11 +5,11 @@ import re
 
 
 # 账号信息
-endpoint = "cn-north-4"
-huawei_account = "***REMOVED***"
-IAM_user = "***REMOVED***"
-password = "***REMOVED***"
-project = "***REMOVED***"
+endpoint = "your_endpoint"
+huawei_account = "your_account"
+IAM_user = "your_username"
+password = "your_password"
+project = "your_project_id"
 
 # 获取IAM Token
 def get_iam_token():
