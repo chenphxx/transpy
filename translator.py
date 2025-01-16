@@ -6,8 +6,8 @@ import re
 
 # 账号信息
 endpoint = "your_endpoint"
-huawei_account = "your_huawei_account"
-IAM_user = "your_IAM_user"
+huawei_account = "your_account"
+IAM_user = "your_username"
 password = "your_password"
 project = "your_project_id"
 
