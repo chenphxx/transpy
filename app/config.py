@@ -6,6 +6,7 @@ IAM_transpy-accessKeys.csv。project_id 从环境变量或 .env 读取。
 """
 
 import os
+import sys
 from dataclasses import dataclass
 
 from . import constants
@@ -28,7 +29,13 @@ class Config:
 
 
 def _project_root():
-    """返回项目根目录 (app 包所在目录的上一级)。"""
+    """返回配置查找目录。
+
+    源码运行时为项目根目录; 打包 (PyInstaller) 运行时为 exe 所在目录,
+    以便把 .env / IAM_transpy-accessKeys.csv 放在 exe 旁边。
+    """
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
     return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 
