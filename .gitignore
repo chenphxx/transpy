@@ -11,8 +11,6 @@ dist/
 # 本地密钥与配置 —— 切勿提交
 .env
 IAM_transpy-accessKeys.csv
-password.csv
-account.md
 transpy.spec
 test.py
 
