@@ -44,8 +44,16 @@ python main.py
 ## 打包
 
 ```bash
-pyinstaller --clean --noconsole --onefile --name transpy --icon assets/images/logo.ico --add-data "assets/images/logo.ico;assets/images" main.py
+pyinstaller --clean --noconsole --onefile --name transpy \
+  --icon assets/images/logo.ico \
+  --add-data "assets/images/logo.ico;assets/images" \
+  --exclude-module PyQt5 --exclude-module PySide2 --exclude-module PySide6 \
+  --exclude-module PIL --exclude-module pymongo --exclude-module bson --exclude-module dnspython \
+  main.py
 ```
+
+> 提示: 华为云 SDK 会触发无关依赖 (Qt/Image 剪辑板后端, PyMongo 等) 被一起打包,
+> 使用 `--exclude-module` 剔除后可大幅减小体积 (约从 100MB 降到 25MB)。
 
 ## 项目结构
 
