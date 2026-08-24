@@ -1,10 +1,20 @@
-# 忽略文件夹 
-/dist/
-/build/
-/__pycache__/
+# 虚拟环境
+.venv/
+venv/
 
-# 忽略文件
-/password.csv
-/transpy.spec
-/test.py
-/account.md
+# 构建产物
+__pycache__/
+*.pyc
+build/
+dist/
+
+# 本地密钥与配置 —— 切勿提交
+.env
+IAM_transpy-accessKeys.csv
+password.csv
+account.md
+transpy.spec
+test.py
+
+# 打包产物
+*.exe

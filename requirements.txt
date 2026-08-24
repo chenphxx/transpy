@@ -1,0 +1,5 @@
+# 运行依赖
+pynput>=1.7.6
+pyperclip>=1.8.2
+huaweicloudsdkcore>=3.1.211
+huaweicloudsdknlp>=3.1.211

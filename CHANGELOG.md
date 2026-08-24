@@ -1,5 +1,12 @@
 ## 更新日志
 
+#### V2026.8.24
+
+1. 重构项目为模块化结构, 参考 `app/` 应用包布局, 将入口与逻辑分离 
+2. 认证方式由账号密码改为华为云 AK/SK, 密钥从本地 `.env`/`IAM_transpy-accessKeys.csv` 加载, 不再写入代码 
+3. 从 Git 历史中彻底清除已泄露的账号密码、`password.csv`、`account.md` 及编译/构建产物 
+4. 补充 `requirements.txt`, 更新打包命令与 README
+
 #### V2025.1.16
 
 1. 更名为`transpy` 
