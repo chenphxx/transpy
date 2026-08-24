@@ -29,14 +29,24 @@ class Config:
 
 
 def _project_root():
-    """返回配置查找目录。
+    """返回源码运行时的项目根目录 (app 包所在目录的上一级)。"""
+    return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-    源码运行时为项目根目录; 打包 (PyInstaller) 运行时为 exe 所在目录,
-    以便把 .env / IAM_transpy-accessKeys.csv 放在 exe 旁边。
+
+def _candidate_dirs():
+    """返回按优先级排序的配置查找目录。
+
+    源码运行: 项目根目录 + 当前工作目录。
+    打包运行: exe 所在目录 + 当前工作目录 (把密钥文件放到 exe 旁边即可)。
     """
     if getattr(sys, "frozen", False):
-        return os.path.dirname(sys.executable)
-    return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+        dirs = [os.path.dirname(sys.executable)]
+    else:
+        dirs = [_project_root()]
+    cwd = os.getcwd()
+    if cwd not in dirs:
+        dirs.append(cwd)
+    return dirs
 
 
 def _read_env_file(path):
@@ -44,7 +54,7 @@ def _read_env_file(path):
     env = {}
     if not os.path.isfile(path):
         return env
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, "r", encoding="utf-8-sig") as f:
         for raw in f:
             line = raw.strip()
             if not line or line.startswith("#") or "=" not in line:
@@ -74,39 +84,49 @@ def load(env_file=".env"):
     """加载运行配置。
 
     优先级: 环境变量 > .env 文件 > IAM_transpy-accessKeys.csv (仅 AK/SK)。
+    会依次在多个候选目录中查找 .env 与 CSV。
     """
-    base = _project_root()
-    file_env = _read_env_file(os.path.join(base, env_file))
+    dirs = _candidate_dirs()
 
-    region = (
-        os.environ.get(f"{constants.ENV_PREFIX}REGION")
-        or file_env.get("HUAWEI_REGION")
-        or constants.REGION
-    )
+    # 合并各目录的 .env: 优先级高者优先, 缺失项用低优先级补足
+    file_env = {}
+    for d in dirs:
+        for k, v in _read_env_file(os.path.join(d, env_file)).items():
+            file_env.setdefault(k, v)
 
-    ak = os.environ.get(f"{constants.ENV_PREFIX}AK") or file_env.get("HUAWEI_AK")
-    sk = os.environ.get(f"{constants.ENV_PREFIX}SK") or file_env.get("HUAWEI_SK")
-    if not ak or not sk:
-        csv_ak, csv_sk = _read_access_key_csv(
-            os.path.join(base, constants.CREDENTIAL_FILE)
+    def pick(name):
+        return (
+            os.environ.get(f"{constants.ENV_PREFIX}{name}")
+            or file_env.get(f"HUAWEI_{name}")
         )
-        ak = ak or csv_ak
-        sk = sk or csv_sk
 
-    project_id = (
-        os.environ.get(f"{constants.ENV_PREFIX}PROJECT_ID")
-        or file_env.get("HUAWEI_PROJECT_ID")
-    )
+    region = pick("REGION") or constants.REGION
+    ak = pick("AK")
+    sk = pick("SK")
+    project_id = pick("PROJECT_ID")
+
+    # CSV 兜底 (仅 AK/SK): 在候选目录中依次查找
+    if not ak or not sk:
+        for d in dirs:
+            csv_ak, csv_sk = _read_access_key_csv(
+                os.path.join(d, constants.CREDENTIAL_FILE)
+            )
+            if csv_ak and csv_sk:
+                ak = ak or csv_ak
+                sk = sk or csv_sk
+                break
+
+    searched = " / ".join(dirs)
 
     if not (ak and sk):
         raise ConfigError(
-            "缺少 AK/SK。请设置 HUAWEI_AK/HUAWEI_SK 环境变量, 或在项目目录放置 "
-            f"{constants.CREDENTIAL_FILE} 或本地 .env 文件。"
+            "缺少 AK/SK。请设置 HUAWEI_AK/HUAWEI_SK 环境变量, 或把 "
+            f"{constants.CREDENTIAL_FILE} (或填好 AK/SK 的 .env) 放到以下任一目录: {searched}"
         )
     if not project_id:
         raise ConfigError(
             "缺少 project_id。请设置 HUAWEI_PROJECT_ID 环境变量, 或在 .env 中 "
-            "填写 HUAWEI_PROJECT_ID。"
+            f"填写 HUAWEI_PROJECT_ID。查找目录: {searched}"
         )
 
     return Config(ak=ak, sk=sk, project_id=project_id, region=region)

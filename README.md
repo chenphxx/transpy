@@ -24,11 +24,12 @@ pip install -r requirements.txt
 
 `project_id` 需通过环境变量 `HUAWEI_PROJECT_ID` 或 `.env` 文件提供 
 
+> 打包后的 exe 运行时, 请在 exe 同级目录放置 `IAM_transpy-accessKeys.csv` (或
+> 填好 `HUAWEI_AK`/`HUAWEI_SK`/`HUAWEI_PROJECT_ID` 的 `.env`)。程序会依次查找
+> 「环境变量 → exe 目录 → 当前工作目录」。
+
 ## 打包
 
 ```bash
 pyinstaller --clean --noconsole --onefile --name transpy --icon assets/images/logo.ico --add-data "assets/images/logo.ico;assets/images" --exclude-module PyQt5 --exclude-module PySide2 --exclude-module PySide6 --exclude-module PIL main.py
 ```
-
-> 注意: SDK 依赖的 `bson`/`pymongo` 不可剔除, 否则运行时会报
-> `ModuleNotFoundError: No module named 'bson'`。
