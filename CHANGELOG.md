@@ -22,6 +22,12 @@
 
 10. 打包配置调整: `excludes` 不再排除 `PIL` (托盘图标依赖), `datas` 带上图标资源
 
+11. **修复双击 Ctrl 完全没有反应**: 热键结果回调被错误地接到了 `AppContext.post` (签名是 `(command, payload=None)`), 而监听器按 `callback(text)` 单参数调用, 于是译文被当成「命令名」丢掉, 主线程只留一条「未知命令: xxx」日志, 翻译弹窗永远不出现。现改为经 `_on_result` 适配后投递 `CMD_SHOW_RESULT`, 并新增 `tests/test_hotkey_wiring.py` 回归测试 (该测试在旧接线下会失败)
+
+12. **修复子模块日志丢失**: 日志处理器原先只挂在 `transpy` 这一个 logger 上并关闭了传播, `app.hotkey` / `app.tray` / `app.storage` 等模块用 `logging.getLogger(__name__)` 打的 INFO 日志在打包环境里全部消失 (排查上面那个缺陷时完全看不到「键盘监听已启动」)。现改挂到根 logger
+
+13. **修复长按 Ctrl 触发风暴**: 按住 Ctrl 时系统会持续补发「按下」事件, 原先会被判定为连续双击, 每秒弹出十几个翻译窗口; 现以「两次按下之间是否抬起过」区分自动重复 (`CTRL_REPEAT_GAP`)
+
 ## V2026.8.24
 
 1. 认证方式由账号密码改为华为云 AK/SK, 密钥从本地 `.env`/`IAM_transpy-accessKeys.csv` 加载, 不再写入代码 

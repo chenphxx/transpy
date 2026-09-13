@@ -30,7 +30,7 @@ pip install -r requirements.txt
 2. `%APPDATA%\transpy\config.ini`（GUI 保存的主位置）
 3. 程序所在目录的 `.env`（便携版 / 向后兼容，参考 `.env.example`）
 4. 当前工作目录的 `.env`
-5. 华为云控制台下载的 `IAM_transpy_accessKeys.csv`（只提供 AK/SK）
+5. 华为云控制台下载的 `IAM_transpy-accessKeys.csv`（只提供 AK/SK）
 
 > 仍然支持把 `.env` 或 csv 放在 exe 同级目录（便携版用法），但不再是必须的。
 > 环境变量优先级最高，适合 CI 或临时覆盖。

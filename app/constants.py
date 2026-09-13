@@ -20,6 +20,7 @@ ENV_PREFIX = "HUAWEI_"
 # 功能参数
 MAX_TEXT_LENGTH = 2000          # API 单次可翻译的最大字符数
 DOUBLE_PRESS_INTERVAL = 1.0     # 两次 Ctrl 之间的最大间隔 (秒)
+CTRL_REPEAT_GAP = 0.5           # 小于该间隔的重复 Ctrl 按下判定为长按自动重复 (秒)
 COPY_SETTLE_TIME = 0.05         # 复制后等待剪贴板刷新的时间 (秒)
 UI_POLL_INTERVAL_MS = 60        # 主线程轮询后台任务的间隔 (毫秒)
 

@@ -11,7 +11,7 @@ import time
 from pynput.keyboard import Controller, Key, Listener
 
 from .clipboard import wait_for_text
-from .constants import COPY_SETTLE_TIME, DOUBLE_PRESS_INTERVAL
+from .constants import COPY_SETTLE_TIME, CTRL_REPEAT_GAP, DOUBLE_PRESS_INTERVAL
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,8 @@ class DoubleCtrlListener:
         self.translator = translator
         self.result_callback = result_callback  # callable(str), 必须线程安全
         self._first_press = None
+        self._ctrl_down = False
+        self._ctrl_down_at = 0.0
         self._controller = Controller()
         self._listener = None
         self._paused = False
@@ -33,7 +35,10 @@ class DoubleCtrlListener:
         """启动监听 (非阻塞)。"""
         if self._listener is not None:
             return
-        self._listener = Listener(on_press=self._on_press)
+        self._listener = Listener(
+            on_press=self._on_press,
+            on_release=self._on_release,
+        )
         self._listener.start()  # 不阻塞调用方, 主线程要留给 tkinter
         logger.info("键盘监听已启动")
 
@@ -73,6 +78,16 @@ class DoubleCtrlListener:
             return
 
         now = time.monotonic()
+
+        # 按住 Ctrl 时系统会持续补发「按下」事件 (自动重复)。若不忽略,
+        # 长按 Ctrl 会被当成连续双击, 每秒弹出十几个翻译窗口。
+        # 真正的双击中间必然有一次抬起, 所以这里以「上一次按下之后是否
+        # 抬起过」来区分。
+        if self._ctrl_down and (now - self._ctrl_down_at) < CTRL_REPEAT_GAP:
+            return
+        self._ctrl_down = True
+        self._ctrl_down_at = now
+
         if self._first_press is None:
             self._first_press = now
             return
@@ -84,6 +99,16 @@ class DoubleCtrlListener:
                 self._handle()
             except Exception:
                 logger.exception("处理双击 Ctrl 时出错")
+
+    def _on_release(self, key):
+        """记录 Ctrl 抬起, 用于区分「再次按下」与「长按自动重复」。
+
+        注意: _handle() 合成的 Ctrl+C 同样会产生抬起事件, 这里只是把状态
+        置为未按下; 若它抢在用户真正抬起之前到达, 后续重复事件会以
+        CTRL_REPEAT_GAP 兜底, 不会连续触发。
+        """
+        if key in (Key.ctrl_l, Key.ctrl_r):
+            self._ctrl_down = False
 
     def _handle(self):
         # 模拟 Ctrl+C 复制当前选中的文本

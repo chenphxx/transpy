@@ -81,7 +81,7 @@ class AppContext:
     def _start_listener(self):
         from .hotkey import DoubleCtrlListener
 
-        self._listener = DoubleCtrlListener(self.translator, self.post)
+        self._listener = DoubleCtrlListener(self.translator, self._on_result)
         self._listener.start()
 
     def _start_tray(self):
@@ -136,6 +136,15 @@ class AppContext:
     def post(self, command, payload=None):
         """任何线程都可以调用, 把要在主线程执行的动作排队。"""
         self._queue.put((command, payload))
+
+    def _on_result(self, text):
+        """热键线程的结果回调: 把译文投递到主线程展示。
+
+        注意: 这里必须是 callable(str) 形式的适配器。早先直接把 self.post
+        传进监听器, 而 post 的签名是 (command, payload), 于是译文被当成
+        "命令名", 主线程只记一条「未知命令」, 翻译弹窗永远不出现。
+        """
+        self.post(CMD_SHOW_RESULT, text)
 
     def _dispatch(self):
         """主线程轮询队列并执行 UI 操作。"""

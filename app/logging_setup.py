@@ -54,22 +54,27 @@ class _StreamToLogger:
 
 
 def setup(level=logging.INFO):
-    """配置根 logger, 返回 logger 实例。重复调用是安全的。"""
-    logger = logging.getLogger(LOGGER_NAME)
-    logger.setLevel(level)
-    logger.propagate = False
+    """配置根 logger, 返回 logger 实例。重复调用是安全的。
+
+    处理器必须挂在 root 上: 各子模块用的是 logging.getLogger(__name__)
+    (app.hotkey / app.tray / app.storage ...), 它们会向 root 传播。早先只给
+    "transpy" 这一个 logger 配 handler 并关掉传播, 结果这些模块的 INFO
+    日志在打包 (windowed) 环境里彻底消失, 排查问题时看不到任何线索。
+    """
+    root = logging.getLogger()
+    root.setLevel(level)
 
     formatter = logging.Formatter(
         "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    if not logger.handlers:
+    if not root.handlers:
         # 无控制台时 sys.stderr 可能为 None (pythonw / console=False)
         if sys.stderr is not None:
             stream = logging.StreamHandler(sys.stderr)
             stream.setFormatter(formatter)
-            logger.addHandler(stream)
+            root.addHandler(stream)
 
         try:
             ensure_dir(user_log_dir())
@@ -80,10 +85,16 @@ def setup(level=logging.INFO):
                 encoding="utf-8",
             )
             file_handler.setFormatter(formatter)
-            logger.addHandler(file_handler)
+            root.addHandler(file_handler)
         except OSError:
             # 日志写不了不是致命问题
-            logger.warning("无法创建日志文件, 仅输出到标准错误")
+            root.warning("无法创建日志文件, 仅输出到标准错误")
+
+    # 第三方库的 INFO 太吵, 只保留告警以上
+    for noisy in ("PIL", "urllib3"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
+
+    logger = logging.getLogger(LOGGER_NAME)
 
     # 打包运行且无 stderr 时, print() 会丢失, 重定向到日志
     if getattr(sys, "frozen", False) and sys.stderr is None:
