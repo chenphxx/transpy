@@ -3,3 +3,11 @@ pynput>=1.7.6
 pyperclip>=1.8.2
 huaweicloudsdkcore>=3.1.211
 huaweicloudsdknlp>=3.1.211
+
+# 托盘图标 (退出入口) 与图标处理
+# 注意: transpy.spec 的 excludes 中不能排除 PIL, 否则托盘图标创建失败
+pystray>=0.19.5
+Pillow>=10.0.0
+
+# 打包 (可选)
+pyinstaller>=6.0.0

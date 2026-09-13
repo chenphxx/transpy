@@ -11,8 +11,9 @@ dist/
 # 本地密钥与配置 —— 切勿提交
 .env
 IAM_transpy-accessKeys.csv
-transpy.spec
-test.py
 
 # 打包产物
 *.exe
+
+# 注意: transpy.spec 与 version_info.txt 现在是项目的一部分 (打包配置),
+# 因此不再忽略 —— 它们不含任何机密信息。
