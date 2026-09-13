@@ -11,11 +11,11 @@ import pyperclip
 from ..constants import ICON_PATH
 from ..paths import resource_path
 
-WINDOW_WIDTH = 360
-WINDOW_HEIGHT = 180
 WRAP_LENGTH = 320
 MARGIN = 8          # 与屏幕边缘的最小间距
-CURSOR_OFFSET = 12  # 窗口相对鼠标的偏移
+CURSOR_OFFSET = 12  # 窗口相对光标的偏移, 避免正好盖住光标
+MIN_WIDTH = 240
+MIN_HEIGHT = 100
 
 
 class ResultWindow(tk.Toplevel):
@@ -23,16 +23,19 @@ class ResultWindow(tk.Toplevel):
 
     def __init__(self, master, result, title="翻译结果"):
         super().__init__(master)
+
+        # 先在隐藏状态下把内容建好再定位: 窗口一旦以默认尺寸显示出来, 系统
+        # 会把它摆到默认级联位置, 之后再设置位置多半会被丢掉, 结果就是弹窗
+        # 不在光标处
+        self.withdraw()
         self.title(title)
-        self.minsize(240, 100)
+        self.minsize(MIN_WIDTH, MIN_HEIGHT)
 
         try:
             self.iconbitmap(resource_path(ICON_PATH))
         except Exception:
             # 图标缺失不应导致程序崩溃
             pass
-
-        self._place_near_pointer()
 
         self.label = tk.Label(
             self, text=result, wraplength=WRAP_LENGTH, justify="left",
@@ -51,6 +54,8 @@ class ResultWindow(tk.Toplevel):
         self.bind("<Escape>", lambda _event: self.destroy())
         self.bind("<Control-c>", lambda _event: self.copy_to_clipboard())
 
+        self._place_at_pointer()
+        self.deiconify()
         self.lift()
         try:
             self.attributes("-topmost", True)
@@ -58,25 +63,32 @@ class ResultWindow(tk.Toplevel):
         except tk.TclError:
             pass
 
-    def _place_near_pointer(self):
-        """把窗口放在鼠标附近, 并保证不会跑到屏幕外。
+    def _place_at_pointer(self):
+        """把窗口定位到光标处, 并保证整个窗口都在屏幕内。
 
-        直接用鼠标坐标会出现窗口下边缘超出屏幕的情况 (鼠标在屏幕底部时),
-        所以这里按鼠标位置钳制到工作区内。
+        尺寸取内容实际需要的大小 (长译文的窗口更高), 位置和尺寸一起在
+        deiconify 之前设置好, 否则系统会用默认尺寸重新摆放窗口。
         """
         try:
-            width, height = self.winfo_screenwidth(), self.winfo_screenheight()
+            screen_w = self.winfo_screenwidth()
+            screen_h = self.winfo_screenheight()
         except tk.TclError:
             return
 
-        x, y = self.winfo_pointerx() + CURSOR_OFFSET, self.winfo_pointery() + CURSOR_OFFSET
+        self.update_idletasks()
+        width = max(self.winfo_reqwidth(), MIN_WIDTH)
+        height = max(self.winfo_reqheight(), MIN_HEIGHT)
 
-        if x + WINDOW_WIDTH > width - MARGIN:
-            x = max(MARGIN, x - WINDOW_WIDTH - 2 * CURSOR_OFFSET)
-        if y + WINDOW_HEIGHT > height - MARGIN:
-            y = max(MARGIN, y - WINDOW_HEIGHT - 2 * CURSOR_OFFSET)
+        x = self.winfo_pointerx() + CURSOR_OFFSET
+        y = self.winfo_pointery() + CURSOR_OFFSET
 
-        self.geometry(f"+{x}+{y}")
+        # 光标右下放不下就翻到左上, 两种情况都不允许超出屏幕
+        if x + width > screen_w - MARGIN:
+            x = max(MARGIN, x - width - 2 * CURSOR_OFFSET)
+        if y + height > screen_h - MARGIN:
+            y = max(MARGIN, y - height - 2 * CURSOR_OFFSET)
+
+        self.geometry(f"{width}x{height}+{x}+{y}")
 
     def copy_to_clipboard(self):
         pyperclip.copy(self.label.cget("text"))
